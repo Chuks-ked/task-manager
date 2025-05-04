@@ -7,7 +7,7 @@ from .serializers import CategorySerializer, TaskSerializer, UserSerializer
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]  # Allow unauthenticated users to register
+    permission_classes = [AllowAny]
 
 
 class CategoryListCreateView(generics.ListCreateAPIView):
@@ -23,6 +23,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    filterset_fields = ['status', 'priority', 'category']
 
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
