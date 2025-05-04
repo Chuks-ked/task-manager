@@ -1,6 +1,25 @@
 from rest_framework import serializers
 from .models import Category, Task, CustomUser
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'password', 'bio', 'created_at']
+        read_only_fields = ['id', 'created_at']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            password=validated_data['password'],
+        )
+        user.bio = validated_data.get('bio', '')
+        user.save()
+        return user
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
