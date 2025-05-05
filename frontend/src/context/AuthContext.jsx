@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import axiosInstance from "../api/axiosinstance";
+import axiosInstance from "../api/axiosInstance";
 
 
 
@@ -32,13 +32,13 @@ const AuthProvider = ({children}) => {
 
     const login = async (username, password) => {
         try {
-            const response = await axiosInstance.post('api/token/', {username, password})
+            const response = await axiosInstance.post('token/', {username, password})
             const {access, refresh} = response.data
             localStorage.setItem('accessToken', access)
             localStorage.setItem('refreshToken', refresh)
             setAccessToken(access)
             setRefreshToken(refresh)
-            setUser([username])
+            setUser({username})
             return true;
         }
         catch (err) {
@@ -49,7 +49,7 @@ const AuthProvider = ({children}) => {
 
     const signup = async (username, email, password, bio) => {
         try {
-            const response = await axiosInstance.post('api/register/', {username, email, password, bio})
+            const response = await axiosInstance.post('register/', {username, email, password, bio})
             const userData = response.data
             setUser(userData)
             // after signing up, user have to login to get a token
