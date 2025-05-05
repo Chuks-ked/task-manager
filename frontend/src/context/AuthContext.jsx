@@ -71,14 +71,17 @@ const AuthProvider = ({children}) => {
     }
 
 
+    const value = {
+        user,
+        accessToken,
+        refreshToken,
+        loading,
+        login,
+        signup,
+        logout,
+    }
 
-
-
-
-
-
-
-
-
-
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
+export {AuthContext, AuthProvider}
