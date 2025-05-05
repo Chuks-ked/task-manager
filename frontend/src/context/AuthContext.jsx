@@ -47,7 +47,28 @@ const AuthProvider = ({children}) => {
         }
     }
 
+    const signup = async (username, email, password, bio) => {
+        try {
+            const response = await axiosInstance.post('api/register/', {username, email, password, bio})
+            const userData = response.data
+            setUser(userData)
+            // after signing up, user have to login to get a token
+            return true;
+        }
+        catch (err) {
+            console.error('Signup failed:', err)
+            throw new Error('Signup failed. Please try again')
+        }
+    }
 
+    const logout = () => {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+
+        setAccessToken('')
+        setRefreshToken('')
+        setUser(null)
+    }
 
 
 
