@@ -25,7 +25,7 @@ const TaskForm = ({task:initialTask, onClose}) => {
         try {
             if (initialTask) {
                 // update existing task
-                await axiosInstance.patch('tasks/${initialTask.id}/', task)
+                await axiosInstance.patch(`tasks/${initialTask.id}/`, task)
             } else {
                 // create new task
                 await axiosInstance.post('tasks/', {...task, user: user?.id});
