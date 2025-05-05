@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import axiosInstance from '../api/axiosInstance';
 
-const TaskList = () => {
+const TaskList = ({onEditTask}) => {
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
 
@@ -31,7 +31,7 @@ const TaskList = () => {
                 <p>No tasks available.</p>
             ) : (
                 tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} />
+                    <TaskCard key={task.id} task={task} onEdit={() => onEditTask(task)} />
                 ))
             )}
         </div>
