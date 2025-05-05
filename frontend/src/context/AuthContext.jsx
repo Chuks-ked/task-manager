@@ -1,3 +1,63 @@
+import { createContext, useEffect, useState } from "react";
+import axiosInstance from "../api/axiosinstance";
 
 
 
+const AuthContext = createContext()
+
+const AuthProvider = ({children}) => {
+    const [user, setUser] = useState(null)
+    const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || '')
+    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || '')
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        // check for existing token on app load
+        const initializeAuth = async () => {
+            if (accessToken) {
+                try {
+                    // validate token by fetching user data or a protected endpoint
+                    const response = await axiosInstance.get('tasks/')
+                    setUser({id:response.data[0]?.user || null})
+                }
+                catch (err) {
+                    console.error('Token validation failed:', err)
+                    logout(); //Clears invalid token
+                }
+            }
+            setLoading(false);
+        }
+        initializeAuth();
+    }, []);
+
+    const login = async (username, password) => {
+        try {
+            const response = await axiosInstance.post('api/token/', {username, password})
+            const {access, refresh} = response.data
+            localStorage.setItem('accessToken', access)
+            localStorage.setItem('refreshToken', refresh)
+            setAccessToken(access)
+            setRefreshToken(refresh)
+            setUser([username])
+            return true;
+        }
+        catch (err) {
+            console.error('Login in failed:', err)
+            throw new Error('Invalid Credentials')
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
