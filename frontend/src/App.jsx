@@ -3,11 +3,12 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
-import Signup from './components/Signup';
+import SignUp from './components/SignUp';
+
 
 const App = () => {
   const { user, logout } = useContext(AuthContext);
-  
+
   return (
     <Router>
       <nav className="bg-gray-800 text-white p-4">
@@ -34,7 +35,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<TaskList />} />
           <Route path="/" element={<Login />} />
-          <Route path="/" element={<Signup />} />
+          <Route path="/" element={<SignUp />} />
         </Routes>
       </div>
     </Router>
