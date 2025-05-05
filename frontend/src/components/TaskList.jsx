@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
-import axiosInstance from '../api/axiosinstance';
+import axiosInstance from '../api/axiosInstance';
 
 const TaskList = () => {
     const [tasks, setTasks] = useState([]);
@@ -13,15 +13,16 @@ const TaskList = () => {
                 setTasks(response.data);
             }
             catch (err) {
-                setError('Failed to fetch tasks. Please log in or try again later.')
-                console.error(err)
+                setError('Failed to fetch tasks. Please log in or try again later.');
+                console.error(err);
             }
-        }
-        fetchTasks()
+            };
+
+        fetchTasks();
     }, []);
 
     if (error) {
-        return <div className='text-red-500'>{error}</div>
+        return <div className="text-red-500 p-4">{error}</div>;
     }
 
     return (
