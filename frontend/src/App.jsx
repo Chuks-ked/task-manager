@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
-import SignUp from './components/SignUp';
-
+import Signup from './components/Signup';
 
 const App = () => {
   const { user, logout } = useContext(AuthContext);
@@ -16,9 +15,9 @@ const App = () => {
           <li><Link to="/" className="hover:text-gray-300">Dashboard</Link></li>
           {user ? (
             <>
-              <li><span className='text-gray-300'>Welcome, {user.username}</span></li>
+              <li><span className="text-gray-300">Welcome, {user.username}</span></li>
               <li>
-                <button onClick={logout} className='hover:text-gray-300'>Logout</button>
+                <button onClick={logout} className="hover:text-gray-300">Logout</button>
               </li>
             </>
           ) : (
@@ -28,14 +27,13 @@ const App = () => {
             </>
           )
           }
-
         </ul>
       </nav>
       <div className="p-4">
         <Routes>
           <Route path="/" element={<TaskList />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </div>
     </Router>
