@@ -140,8 +140,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',  # Enable DjangoFilterBackend
+        'django_filters.rest_framework.DjangoFilterBackend',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'tasks.pagination.CustomPageNumberPagination',
+    'PAGE_SIZE': 5,
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 5,  # Number of tasks per page
 }
 
 CORS_ALLOWED_ORIGINS = [
