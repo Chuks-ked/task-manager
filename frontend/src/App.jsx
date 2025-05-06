@@ -69,7 +69,7 @@ const App = () => {
         <Routes>
           <Route
             path="/"
-            element={<TaskList onEditTask={handleEditTask} />}
+            element={<TaskList key={refreshKey} onEditTask={handleEditTask} />}
           />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
