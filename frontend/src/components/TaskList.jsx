@@ -4,12 +4,26 @@ import axiosInstance from '../api/axiosInstance';
 
 const TaskList = ({ onEditTask }) => {
     const [tasks, setTasks] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [error, setError] = useState(null);
     const [filters, setFilters] = useState({
         status: '',
         priority: '',
         category_id: '',
     });
+
+    useEffect (() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosInstance.get('categories/')
+                setCategories(response.data)
+            }
+            catch (err) {
+                console.error('Error fetching categories:', err)
+            }
+        }
+        fetchCategories();
+    }, []);
 
     const fetchTasks = async (filters) => {
         try {
@@ -81,14 +95,19 @@ const TaskList = ({ onEditTask }) => {
                     <option value="MEDIUM">MEDIUM</option>
                     <option value="HIGH">HIGH</option>
                 </select>
-                <input
-                    type="number"
+                <select
                     name="category_id"
                     value={filters.category_id}
                     onChange={handleFilterChange}
-                    placeholder="Category ID"
                     className="p-2 border rounded"
-                />
+                >
+                    <option value="">All Categories</option>
+                    {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                        {category.name}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {tasks.length === 0 ? (
