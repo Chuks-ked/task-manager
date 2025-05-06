@@ -6,6 +6,7 @@ const TaskList = ({ onEditTask }) => {
     const [tasks, setTasks] = useState([]);
     const [categories, setCategories] = useState([]);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         status: '',
         priority: '',
@@ -15,11 +16,15 @@ const TaskList = ({ onEditTask }) => {
     useEffect (() => {
         const fetchCategories = async () => {
             try {
+                setLoading(true)
                 const response = await axiosInstance.get('categories/')
                 setCategories(response.data)
             }
             catch (err) {
                 console.error('Error fetching categories:', err)
+            }
+            finally {
+                setLoading(false);
             }
         }
         fetchCategories();
@@ -27,6 +32,7 @@ const TaskList = ({ onEditTask }) => {
 
     const fetchTasks = async (filters) => {
         try {
+            setLoading(true)
             console.log('Fetching tasks with filters:', filters);
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
@@ -40,6 +46,9 @@ const TaskList = ({ onEditTask }) => {
         catch (err) {
             console.error('Error fetching tasks:', err);
             setError('Failed to fetch tasks. Please log in or try again later.');
+        }
+        finally {
+            setLoading(false)
         }
     };
 
