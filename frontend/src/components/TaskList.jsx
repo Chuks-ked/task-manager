@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import axiosInstance from '../api/axiosInstance';
-import {useQuery} from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 
 const TaskList = ({ onEditTask }) => {
     const [filters, setFilters] = useState({
@@ -14,7 +15,7 @@ const TaskList = ({ onEditTask }) => {
         currentPage: 1,
     })
 
-    const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useQuery({
+    const { data: tasksData, isLoading: tasksLoading, error: tasksError, refetch: refetchTasks } = useQuery({
         queryKey: ['tasks', filters, pagination.currentPage],
         queryFn: async () => {
             const params = new URLSearchParams();
@@ -41,6 +42,13 @@ const TaskList = ({ onEditTask }) => {
         }
     });
 
+    const updateTaskOrderMutation = useMutation({
+        mutationFn: async ({ taskId, newOrder }) => {
+            await axiosInstance.patch(`tasks/${taskId}/`, { order: newOrder });
+        },
+        onSuccess: () => refetchTasks(),
+    });
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
@@ -63,6 +71,24 @@ const TaskList = ({ onEditTask }) => {
     const refreshTasks = () => {
         setPagination((prev) => ({ ...prev, currentPage: 1 }));
     };
+
+    const onDragEnd = (result) => {
+        if (!result.destination) 
+            return;
+        const items = Array.from(tasksData);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        const updatedTasks = items.map((task, index) => ({
+        ...task,
+        order: index,
+        }));
+
+        setPagination((prev) => ({ ...prev, totalCount: prev.totalCount })); // Trigger re-render
+        updatedTasks.forEach((task, index) => {
+        updateTaskOrderMutation.mutate({ taskId: task.id, newOrder: index });
+        });
+    }
 
     if (tasksLoading || categoriesLoading) {
         return <div className='p-4 text-center text-gray-600'>Loading tasks...</div>
@@ -133,20 +159,40 @@ const TaskList = ({ onEditTask }) => {
                     </select>
                 </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tasks.length === 0 ? (
-                <p>No tasks available.</p>
-                ) : (
-                tasks.map((task) => (
-                    <TaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={() => onEditTask(task)} 
-                        onDelete={handleDeleteTask}
-                    />
-                ))
+            <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="tasks">
+                {(provided) => (
+                    <div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    >
+                    {tasks.length === 0 ? (
+                        <p className="text-gray-600 text-center">No tasks available.</p>
+                    ) : (
+                        tasks.map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                            {(provided) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                            >
+                                <TaskCard
+                                task={task}
+                                onEdit={() => onEditTask(task)}
+                                onDelete={handleDeleteTask}
+                                />
+                            </div>
+                            )}
+                        </Draggable>
+                        ))
+                    )}
+                    {provided.placeholder}
+                    </div>
                 )}
-            </div>
+                </Droppable>
+            </DragDropContext>
             {totalPages > 1 && (
                 <div className="mt-6 flex justify-center items-center space-x-4">
                     <button
