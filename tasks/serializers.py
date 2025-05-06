@@ -39,3 +39,14 @@ class TaskSerializer(serializers.ModelSerializer):
             'category', 'category_id', 'user', 'created_at', 'updated_at'
         ]
         read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data['user'] = instance.user  # Preserve user
+        return super().update(instance, validated_data)
+    
+    def get_category(self, obj):
+        return {"id": obj.category.id, "name": obj.category.name} if obj.category else None
