@@ -73,60 +73,72 @@ const TaskList = ({ onEditTask }) => {
     console.log('Rendering TaskList with tasks:', tasks, 'error:', error);
 
     if (loading) {
-        return <div className='p-4 text-center'>Loading tasks...</div>
+        return <div className='p-4 text-center text-gray-600'>Loading tasks...</div>
     }
 
     if (error) {
         return (
-        <div className="text-red-500 p-4">
+        <div className="text-red-500 p-4 text-center">
             {error}
-            <button onClick={refreshTasks} className="ml-2 bg-blue-500 text-white p-1 rounded hover:bg-blue-600">
-            Retry
+            <button 
+                onClick={refreshTasks} 
+                className="ml-2 bg-blue-500 text-white p-1 rounded hover:bg-blue-600 transition"
+            >
+                Retry
             </button>
         </div>
         );
     }
 
     return (
-        <div className="p-4">
-            <div className="mb-4 space-y-2">
-                <select
-                    name="status"
-                    value={filters.status}
-                    onChange={handleFilterChange}
-                    className="p-2 border rounded"
-                >
-                    <option value="">All Statuses</option>
-                    <option value="TODO">TODO</option>
-                    <option value="IN_PROGRESS">IN PROGRESS</option>
-                    <option value="DONE">DONE</option>
-                </select>
-                <select
-                    name="priority"
-                    value={filters.priority}
-                    onChange={handleFilterChange}
-                    className="p-2 border rounded"
-                >
-                    <option value="">All Priorities</option>
-                    <option value="LOW">LOW</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                    <option value="HIGH">HIGH</option>
-                </select>
-                <select
-                    name="category_id"
-                    value={filters.category_id}
-                    onChange={handleFilterChange}
-                    className="p-2 border rounded"
-                >
-                    <option value="">All Categories</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                        {category.name}
-                        </option>
-                    ))}
-                </select>
+        <div className="p-6">
+            <div className="mb-6 flex space-x-4">
+                <div className='flex-1' >
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>Status</label>
+                    <select
+                        name="status"
+                        value={filters.status}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="TODO">TODO</option>
+                        <option value="IN_PROGRESS">IN PROGRESS</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+                </div>
+                <div className='flex-1' >
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Priority</label>
+                    <select
+                        name="priority"
+                        value={filters.priority}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="">All Priorities</option>
+                        <option value="LOW">LOW</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                    </select>
+                </div>
+                <div className='flex-1' >
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Category</label>
+                    <select
+                        name="category_id"
+                        value={filters.category_id}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="">All Categories</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                            {category.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {tasks.length === 0 ? (
                 <p>No tasks available.</p>
                 ) : (
