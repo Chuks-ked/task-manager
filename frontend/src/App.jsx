@@ -30,32 +30,37 @@ const App = () => {
 
   return (
     <Router>
-      <nav className="bg-gray-800 text-white p-4">
-        <ul className="flex space-x-4">
-          <li><Link to="/" className="hover:text-gray-300">Dashboard</Link></li>
-          {user ? (
-            <>
-              <li><span className="text-gray-300">Welcome, {user.username || 'User'}</span></li>
-              <li>
-                <button onClick={logout} className="hover:text-gray-300">
-                  Logout
-                </button>
-              </li>
-              <li>
-                <button onClick={handleAddTask} className="hover:text-gray-300">
-                  Add Task
-                </button>
-              </li>
-            </>
-          ) : (
-            <>
-              <li><Link to="/login" className="hover:text-gray-300">Login</Link></li>
-              <li><Link to="/signup" className="hover:text-gray-300">Signup</Link></li>
-            </>
-          )}
-        </ul>
+      <nav className="bg-gray-800 text-white p-4 shadow-lg">
+        <div className='container mx-auto flex justify-between items-center'>
+            <Link to="/" className="text-2xl font-bold hover:text-gray-300">
+              Task Manager
+            </Link>
+          <ul className="flex space-x-4 items-center gap-4">
+            {user ? (
+              <>
+                <li><span className="text-gray-300">Welcome, {user.username || 'User'}</span></li>
+                <li>
+                  <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
+                    Logout
+                  </button>
+                </li>
+                <li>
+                  <button onClick={handleAddTask} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 transition">
+                    Add Task
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li><Link to="/login" className="hover:text-gray-300 px-4 py-2">Login</Link></li>
+                <li><Link to="/signup" className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">Signup</Link></li>
+              </>
+            )}
+          </ul>
+        </div>
       </nav>
-      <div className="p-4">
+      <div className="container mx-auto p-4">
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <Routes>
           <Route
             path="/"
