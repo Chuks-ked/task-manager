@@ -53,6 +53,10 @@ const TaskList = ({ onEditTask }) => {
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleDeleteTask = (taskId) => {
+        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    };
+
     const refreshTasks = () => {
         fetchTasks(filters);
     };
@@ -114,7 +118,12 @@ const TaskList = ({ onEditTask }) => {
                 <p>No tasks available.</p>
                 ) : (
                 tasks.map((task) => (
-                    <TaskCard key={task.id} task={task} onEdit={() => onEditTask(task)} />
+                    <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={() => onEditTask(task)} 
+                        onDelete={handleDeleteTask}
+                    />
                 ))
                 )}
             </div>
