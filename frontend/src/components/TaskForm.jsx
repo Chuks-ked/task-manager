@@ -35,7 +35,7 @@ const TaskForm = ({ task: initialTask, onClose, onTaskSaved }) => {
             onTaskSaved();
             onClose();
             navigate('/');
-            window.location.reload(); // Refresh to update the task list
+            // window.location.reload(); // Refresh to update the task list
         } 
         catch (err) {
             setError('Failed to save task. Please check your input or try again.');
