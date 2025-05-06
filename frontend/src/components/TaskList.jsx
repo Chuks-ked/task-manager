@@ -25,10 +25,12 @@ const TaskList = ({ onEditTask }) => {
             try {
                 setLoading(true)
                 const response = await axiosInstance.get('categories/')
-                setCategories(response.data)
+                console.log("Categories response:", response.data)
+                setCategories(Array.isArray(response.data) ? response.data : response.data.results || [])
             }
             catch (err) {
                 console.error('Error fetching categories:', err)
+                setError('Failed to fetch categories.')
             }
             finally {
                 setLoading(false);
@@ -49,10 +51,11 @@ const TaskList = ({ onEditTask }) => {
 
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
             console.log('Tasks received:', response.data);
-            setTasks(response.data.results || []);
+            const taskData = response.data.results || (Array.isArray(response.data) ? response.data : [])
+            setTasks(taskData);
             setPagination({
                 currentPage: page,
-                totalCount: response.data.count || 0,
+                totalCount: response.data.count || taskData.length ||  0,
                 next: response.data.next,
                 previous: response.data.previous,
             })
@@ -88,7 +91,7 @@ const TaskList = ({ onEditTask }) => {
             fetchTasks(pagination.currentPage); //refresh current page after deletion
         }
     };
-
+    
     const handlePageChange = (newPage) => {
         fetchTasks(newPage);
     };
