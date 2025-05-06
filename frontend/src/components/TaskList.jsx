@@ -72,6 +72,10 @@ const TaskList = ({ onEditTask }) => {
 
     console.log('Rendering TaskList with tasks:', tasks, 'error:', error);
 
+    if (loading) {
+        return <div className='p-4 text-center'>Loading tasks...</div>
+    }
+
     if (error) {
         return (
         <div className="text-red-500 p-4">
