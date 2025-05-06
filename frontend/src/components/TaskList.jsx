@@ -2,42 +2,58 @@ import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import axiosInstance from '../api/axiosInstance';
 
-const TaskList = ({onEditTask}) => {
+const TaskList = ({ onEditTask }) => {
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
     const [filters, setFilters] = useState({
         status: '',
         priority: '',
         category_id: '',
-    })
+    });
 
     const fetchTasks = async (filters) => {
         try {
+            console.log('Fetching tasks with filters:', filters);
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
             if (filters.priority) params.append('priority', filters.priority);
             if (filters.category_id) params.append('category_id', filters.category_id);
 
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
+            console.log('Tasks received:', response.data);
             setTasks(response.data);
-        }
+        } 
         catch (err) {
-            setError('Failed to fetch tasks. Please try again later');
-            console.error(err);
+            console.error('Error fetching tasks:', err);
+            setError('Failed to fetch tasks. Please log in or try again later.');
         }
     };
 
     useEffect(() => {
+        console.log('useEffect triggered with filters:', filters);
         fetchTasks(filters);
-    }, [filters])
+    }, [filters]);
 
     const handleFilterChange = (e) => {
-        const {name, value} = e.target;
-        setFilters((prev) => ({...prev, [name]:value}))
-    }
+        const { name, value } = e.target;
+        setFilters((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const refreshTasks = () => {
+        fetchTasks(filters);
+    };
+
+    console.log('Rendering TaskList with tasks:', tasks, 'error:', error);
 
     if (error) {
-        return <div className="text-red-500 p-4">{error}</div>;
+        return (
+        <div className="text-red-500 p-4">
+            {error}
+            <button onClick={refreshTasks} className="ml-2 bg-blue-500 text-white p-1 rounded hover:bg-blue-600">
+            Retry
+            </button>
+        </div>
+        );
     }
 
     return (
@@ -48,7 +64,7 @@ const TaskList = ({onEditTask}) => {
                     value={filters.status}
                     onChange={handleFilterChange}
                     className="p-2 border rounded"
-                    >
+                >
                     <option value="">All Statuses</option>
                     <option value="TODO">TODO</option>
                     <option value="IN_PROGRESS">IN PROGRESS</option>
@@ -59,7 +75,7 @@ const TaskList = ({onEditTask}) => {
                     value={filters.priority}
                     onChange={handleFilterChange}
                     className="p-2 border rounded"
-                    >
+                >
                     <option value="">All Priorities</option>
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>
@@ -85,17 +101,7 @@ const TaskList = ({onEditTask}) => {
             </div>
         </div>
     );
-    // return (
-    //     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    //         {tasks.length === 0 ? (
-    //             <p>No tasks available.</p>
-    //         ) : (
-    //             tasks.map((task) => (
-    //                 <TaskCard key={task.id} task={task} onEdit={() => onEditTask(task)} />
-    //             ))
-    //         )}
-    //     </div>
-    // );
 };
 
 export default TaskList;
+
