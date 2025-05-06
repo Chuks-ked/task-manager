@@ -28,7 +28,7 @@ class TaskListCreateView(generics.ListCreateAPIView):
     filterset_fields = ['status', 'priority', 'category']
 
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)
+        return Task.objects.filter(user=self.request.user).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
