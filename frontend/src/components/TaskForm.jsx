@@ -14,6 +14,7 @@ const TaskForm = ({ task: initialTask, onClose }) => {
         category_id: null,
     });
     const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,19 +23,24 @@ const TaskForm = ({ task: initialTask, onClose }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true)
         try {
-        if (initialTask) {
-            await axiosInstance.patch(`tasks/${initialTask.id}/`, task);
-        } else {
-            await axiosInstance.post('tasks/', { ...task, user: user?.id });
+            if (initialTask) {
+                await axiosInstance.patch(`tasks/${initialTask.id}/`, task);
+            } else {
+                await axiosInstance.post('tasks/', { ...task, user: user?.id });
+            }
+            setError(null);
+            onClose();
+            navigate('/');
+            // window.location.reload(); // Refresh to update the task list
+        } 
+        catch (err) {
+            setError('Failed to save task. Please check your input or try again.');
+            console.error(err);
         }
-        setError(null);
-        onClose();
-        navigate('/');
-        window.location.reload(); // Refresh to update the task list
-        } catch (err) {
-        setError('Failed to save task. Please check your input or try again.');
-        console.error(err);
+        finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -52,6 +58,7 @@ const TaskForm = ({ task: initialTask, onClose }) => {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
                 required
+                disabled={isSubmitting}
             />
             </div>
             <div>
@@ -61,6 +68,7 @@ const TaskForm = ({ task: initialTask, onClose }) => {
                 value={task.description}
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
+                disabled={isSubmitting}
             />
             </div>
             <div>
@@ -70,6 +78,7 @@ const TaskForm = ({ task: initialTask, onClose }) => {
                 value={task.status}
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
+                disabled={isSubmitting}
             >
                 <option value="TODO">TODO</option>
                 <option value="IN_PROGRESS">IN PROGRESS</option>
@@ -83,6 +92,7 @@ const TaskForm = ({ task: initialTask, onClose }) => {
                 value={task.priority}
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
+                disabled={isSubmitting}
             >
                 <option value="LOW">LOW</option>
                 <option value="MEDIUM">MEDIUM</option>
@@ -97,13 +107,22 @@ const TaskForm = ({ task: initialTask, onClose }) => {
                 value={task.category_id || ''}
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
+                disabled={isSubmitting}
             />
             </div>
-            <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-            {initialTask ? 'Update Task' : 'Add Task'}
+            <button 
+                type="submit" 
+                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? 'Saving...' : initialTask ? 'Update Task' : 'Add Task'}
             </button>
-            <button type="button" onClick={onClose} className="w-full bg-gray-500 text-white p-2 rounded mt-2 hover:bg-gray-600">
-            Cancel
+            <button 
+                type="button" 
+                onClick={onClose} 
+                className="w-full bg-gray-500 text-white p-2 rounded mt-2 hover:bg-gray-600 disabled:bg-gray-300"
+            >
+                Cancel
             </button>
         </form>
         </div>
