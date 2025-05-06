@@ -10,6 +10,7 @@ const App = () => {
   const { user, logout, error } = useContext(AuthContext);
   const [showForm, setShowForm] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const handleAddTask = () => {
     setSelectedTask(null);
@@ -25,6 +26,10 @@ const App = () => {
     setShowForm(false);
     setSelectedTask(null);
   };
+
+  const handleTaskSaved = () => {
+    setRefreshKey((prev) => prev + 1) //Trigger Tasklist to re-fetch
+  }
 
   console.log('Rendering App with user:', user, 'error:', error);
 
@@ -70,7 +75,11 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
         </Routes>
         {showForm && (
-          <TaskForm task={selectedTask} onClose={handleCloseForm} />
+          <TaskForm 
+            task={selectedTask} 
+            onClose={handleCloseForm} 
+            onTaskSaved={handleTaskSaved}
+          />
         )}
         {error && <p className="text-red-500">{error}</p>}
       </div>
