@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import axiosInstance from '../api/axiosInstance';
+import {useQuery} from '@tanstack/react-query'
 
 const TaskList = ({ onEditTask }) => {
-    const [tasks, setTasks] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         status: '',
         priority: '',
@@ -15,63 +12,34 @@ const TaskList = ({ onEditTask }) => {
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        totalCount: 0,
-        next: null,
-        previous: null,
     })
 
-    useEffect (() => {
-        const fetchCategories = async () => {
-            try {
-                setLoading(true)
-                const response = await axiosInstance.get('categories/')
-                console.log("Categories response:", response.data)
-                setCategories(Array.isArray(response.data) ? response.data : response.data.results || [])
-            }
-            catch (err) {
-                console.error('Error fetching categories:', err)
-                setError('Failed to fetch categories.')
-            }
-            finally {
-                setLoading(false);
-            }
-        }
-        fetchCategories();
-    }, []);
-
-    const fetchTasks = async (page = 1) => {
-        try {
-            setLoading(true)
-            console.log('Fetching tasks with filters:', filters, 'page', page);
+    const { data: tasksData, isLoading: tasksLoading, error: tasksError } = useQuery({
+        queryKey: ['tasks', filters, pagination.currentPage],
+        queryFn: async () => {
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
             if (filters.priority) params.append('priority', filters.priority);
             if (filters.category_id) params.append('category', filters.category_id);
-            params.append('page', page);
-
+            params.append('page', pagination.currentPage);
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
-            console.log('Tasks received:', response.data);
-            const taskData = response.data.results || (Array.isArray(response.data) ? response.data : [])
-            setTasks(taskData);
             setPagination({
-                currentPage: page,
-                totalCount: response.data.count || taskData.length ||  0,
+                currentPage: pagination.currentPage,
+                totalCount: response.data.count || 0,
                 next: response.data.next,
                 previous: response.data.previous,
-            })
-        } 
-        catch (err) {
-            console.error('Error fetching tasks:', err);
-            setError('Failed to fetch tasks. Please log in or try again later.');
-        }
-        finally {
-            setLoading(false)
-        }
-    };
+            });
+            return response.data.results || [];
+        },
+    });
 
-    useEffect(() => {
-        fetchTasks(1);
-    }, [filters]);
+    const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError} =  useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            const response = await axiosInstance.get('categories/')
+            return Array.isArray(response.data) ? response.data : response.data.results || [];
+        }
+    });
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -79,37 +47,31 @@ const TaskList = ({ onEditTask }) => {
     };
 
     const handleDeleteTask = (taskId) => {
-        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
         setPagination((prev) => ({
             ...prev,
             totalCount: prev.totalCount - 1,
         }));
-        if (tasks.length === 1 && pagination.currentPage > 1) {
-            fetchTasks(pagination.currentPage - 1);
+        if (tasksData.length === 1 && pagination.currentPage > 1) {
+            setPagination((prev) => ({ ...prev, currentPage: prev.currentPage - 1 }));
         } 
-        else {
-            fetchTasks(pagination.currentPage); //refresh current page after deletion
-        }
     };
     
     const handlePageChange = (newPage) => {
-        fetchTasks(newPage);
+        setPagination((prev) => ({ ...prev, currentPage: newPage }));
     };
 
     const refreshTasks = () => {
-        fetchTasks(pagination.currentPage);
+        setPagination((prev) => ({ ...prev, currentPage: 1 }));
     };
 
-    console.log('Rendering TaskList with tasks:', tasks, 'error:', error);
-
-    if (loading) {
+    if (tasksLoading || categoriesLoading) {
         return <div className='p-4 text-center text-gray-600'>Loading tasks...</div>
     }
 
-    if (error) {
+    if (tasksError || categoriesError) {
         return (
         <div className="text-red-500 p-4 text-center">
-            {error}
+            {tasksError?.message || categoriesError?.message || 'Failed to fetch data.'}
             <button 
                 onClick={refreshTasks} 
                 className="ml-2 bg-blue-500 text-white p-1 rounded hover:bg-blue-600 transition"
@@ -119,7 +81,8 @@ const TaskList = ({ onEditTask }) => {
         </div>
         );
     }
-
+    const tasks = tasksData || [];
+    const categories = categoriesData || [];
     const totalPages = Math.ceil(pagination.totalCount / 5); // Assuming PAGE_SIZE=5 from backend
 
     return (
