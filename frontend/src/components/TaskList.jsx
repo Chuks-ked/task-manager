@@ -13,6 +13,13 @@ const TaskList = ({ onEditTask }) => {
         category_id: '',
     });
 
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalCount: 0,
+        next: null,
+        previous: null,
+    })
+
     useEffect (() => {
         const fetchCategories = async () => {
             try {
@@ -30,18 +37,25 @@ const TaskList = ({ onEditTask }) => {
         fetchCategories();
     }, []);
 
-    const fetchTasks = async (filters) => {
+    const fetchTasks = async (page = 1) => {
         try {
             setLoading(true)
-            console.log('Fetching tasks with filters:', filters);
+            console.log('Fetching tasks with filters:', filters, 'page', page);
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
             if (filters.priority) params.append('priority', filters.priority);
             if (filters.category_id) params.append('category', filters.category_id);
+            params.append('page', page);
 
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
             console.log('Tasks received:', response.data);
-            setTasks(response.data);
+            setTasks(response.data.results || []);
+            setPagination({
+                currentPage: page,
+                totalCount: response.data.count || 0,
+                next: response.data.next,
+                previous: response.data.previous,
+            })
         } 
         catch (err) {
             console.error('Error fetching tasks:', err);
@@ -53,8 +67,7 @@ const TaskList = ({ onEditTask }) => {
     };
 
     useEffect(() => {
-        console.log('useEffect triggered with filters:', filters);
-        fetchTasks(filters);
+        fetchTasks(1);
     }, [filters]);
 
     const handleFilterChange = (e) => {
@@ -64,10 +77,24 @@ const TaskList = ({ onEditTask }) => {
 
     const handleDeleteTask = (taskId) => {
         setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+        setPagination((prev) => ({
+            ...prev,
+            totalCount: prev.totalCount - 1,
+        }));
+        if (tasks.length === 1 && pagination.currentPage > 1) {
+            fetchTasks(pagination.currentPage - 1);
+        } 
+        else {
+            fetchTasks(pagination.currentPage); //refresh current page after deletion
+        }
+    };
+
+    const handlePageChange = (newPage) => {
+        fetchTasks(newPage);
     };
 
     const refreshTasks = () => {
-        fetchTasks(filters);
+        fetchTasks(pagination.currentPage);
     };
 
     console.log('Rendering TaskList with tasks:', tasks, 'error:', error);
@@ -89,6 +116,8 @@ const TaskList = ({ onEditTask }) => {
         </div>
         );
     }
+
+    const totalPages = Math.ceil(pagination.totalCount / 5); // Assuming PAGE_SIZE=5 from backend
 
     return (
         <div className="p-6">
@@ -152,6 +181,27 @@ const TaskList = ({ onEditTask }) => {
                 ))
                 )}
             </div>
+            {totalPages > 1 && (
+                <div className="mt-6 flex justify-center items-center space-x-4">
+                    <button
+                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                        disabled={!pagination.previous}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition"
+                    >
+                        Previous
+                    </button>
+                    <span className="text-gray-700">
+                        Page {pagination.currentPage} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                        disabled={!pagination.next}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 transition"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
