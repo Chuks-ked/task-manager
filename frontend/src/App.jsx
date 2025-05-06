@@ -5,6 +5,9 @@ import TaskList from './components/TaskList';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import TaskForm from './components/TaskForm';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+
+const queryclient = new QueryClient();
 
 const App = () => {
   const { user, logout, error } = useContext(AuthContext);
@@ -28,62 +31,64 @@ const App = () => {
   };
 
   const handleTaskSaved = () => {
-    setRefreshKey((prev) => prev + 1) //Trigger Tasklist to re-fetch
+    setRefreshKey((prev) => prev + 1)
   }
 
   console.log('Rendering App with user:', user, 'error:', error);
 
   return (
-    <Router>
-      <nav className="bg-gray-800 text-white p-4 shadow-lg">
-        <div className='container mx-auto flex justify-between items-center'>
-            <Link to="/" className="text-2xl font-bold hover:text-gray-300">
-              Task Manager
-            </Link>
-          <ul className="flex space-x-4 items-center gap-4">
-            {user ? (
-              <>
-                <li><span className="text-gray-300">Welcome, {user.username || 'User'}</span></li>
-                <li>
-                  <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
-                    Logout
-                  </button>
-                </li>
-                <li>
-                  <button onClick={handleAddTask} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 transition">
-                    Add Task
-                  </button>
-                </li>
-              </>
-            ) : (
-              <>
-                <li><Link to="/login" className="hover:text-gray-300 px-4 py-2">Login</Link></li>
-                <li><Link to="/signup" className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">Signup</Link></li>
-              </>
-            )}
-          </ul>
+    <QueryClientProvider client={queryclient}>
+      <Router>
+        <nav className="bg-gray-800 text-white p-4 shadow-lg">
+          <div className='container mx-auto flex justify-between items-center'>
+              <Link to="/" className="text-2xl font-bold hover:text-gray-300">
+                Task Manager
+              </Link>
+            <ul className="flex space-x-4 items-center gap-4">
+              {user ? (
+                <>
+                  <li><span className="text-gray-300">Welcome, {user.username || 'User'}</span></li>
+                  <li>
+                    <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
+                      Logout
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={handleAddTask} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 transition">
+                      Add Task
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login" className="hover:text-gray-300 px-4 py-2">Login</Link></li>
+                  <li><Link to="/signup" className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition">Signup</Link></li>
+                </>
+              )}
+            </ul>
+          </div>
+        </nav>
+        <div className="container mx-auto p-4">
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+          <Routes>
+            <Route
+              path="/"
+              element={<TaskList key={refreshKey} onEditTask={handleEditTask} />}
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+          {showForm && (
+            <TaskForm 
+              task={selectedTask} 
+              onClose={handleCloseForm} 
+              onTaskSaved={handleTaskSaved}
+            />
+          )}
+          {error && <p className="text-red-500">{error}</p>}
         </div>
-      </nav>
-      <div className="container mx-auto p-4">
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <Routes>
-          <Route
-            path="/"
-            element={<TaskList key={refreshKey} onEditTask={handleEditTask} />}
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
-        {showForm && (
-          <TaskForm 
-            task={selectedTask} 
-            onClose={handleCloseForm} 
-            onTaskSaved={handleTaskSaved}
-          />
-        )}
-        {error && <p className="text-red-500">{error}</p>}
-      </div>
-    </Router>
+      </Router>
+    </QueryClientProvider>
   );
 };
 
