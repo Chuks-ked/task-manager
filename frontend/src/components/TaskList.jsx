@@ -17,7 +17,7 @@ const TaskList = ({ onEditTask }) => {
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
             if (filters.priority) params.append('priority', filters.priority);
-            if (filters.category_id) params.append('category_id', filters.category_id);
+            if (filters.category_id) params.append('category', filters.category_id);
 
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
             console.log('Tasks received:', response.data);
