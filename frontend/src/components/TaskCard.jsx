@@ -63,14 +63,14 @@ const TaskCard = ({ task, onEdit, onDelete }) => {
             </div>
             <button
                 onClick={onEdit}
-                className="mt-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                className="mt-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
                 disabled={isUpdating || isDeleting}
             >
                 Edit
             </button>
             <button
                 onClick={handleDelete}
-                className='bg-red-500 text-white p-2 rounded hover:bg-red-600'
+                className='bg-red-500 text-white p-2 rounded hover:bg-red-600 disabled:bg-red-300'
                 disabled={isUpdating || isDeleting}
             >
                 {isDeleting ? 'Deleting...' : 'Delete'}
