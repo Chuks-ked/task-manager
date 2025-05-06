@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
-const TaskCard = ({ task, onEdit }) => {
+const TaskCard = ({ task, onEdit, onDelete }) => {
     const [status, setStatus] = useState(task.status);
 
     const handleStatusChange = async (e) => {
@@ -16,6 +16,19 @@ const TaskCard = ({ task, onEdit }) => {
             setStatus(task.status); // Revert on failure
         }
     };
+
+    const handleDelete = async (e) => {
+        if (window.confirm('Are you sure you want to delete this task?')) {
+            try {
+                await axiosInstance.delete(`tasks/${task.id}/`);
+                onDelete(task.id); //Notify parent to remove task from list
+            }
+            catch (err) {
+                console.error('Failed to delete task:', err);
+                alert('Failed to delete task. Please try again.');
+            }
+        }
+    }
 
     return (
         <div className="border rounded-lg p-4 shadow-md">
@@ -40,6 +53,12 @@ const TaskCard = ({ task, onEdit }) => {
                 className="mt-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
             >
                 Edit
+            </button>
+            <button
+                onClick={handleDelete}
+                className='bg-red-500 text-white p-2 rounded hover:bg-red-600'
+            >
+                Delete
             </button>
         </div>
     );
