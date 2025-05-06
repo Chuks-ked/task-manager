@@ -3,7 +3,7 @@ import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
-const TaskForm = ({ task: initialTask, onClose }) => {
+const TaskForm = ({ task: initialTask, onClose, onTaskSaved }) => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [task, setTask] = useState(initialTask || {
@@ -27,10 +27,12 @@ const TaskForm = ({ task: initialTask, onClose }) => {
         try {
             if (initialTask) {
                 await axiosInstance.patch(`tasks/${initialTask.id}/`, task);
-            } else {
+            } 
+            else {
                 await axiosInstance.post('tasks/', { ...task, user: user?.id });
             }
             setError(null);
+            onTaskSaved();
             onClose();
             navigate('/');
             // window.location.reload(); // Refresh to update the task list
