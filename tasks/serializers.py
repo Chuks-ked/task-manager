@@ -27,7 +27,8 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at']
 
 class TaskSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
+    # category = CategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), allow_null=True, required=False)
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), source='category', write_only=True, allow_null=True
     )
@@ -46,7 +47,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         validated_data['user'] = instance.user  # Preserve user
+        print(f"Serializer updating task {instance.id} with data: {validated_data}")
         return super().update(instance, validated_data)
     
     def get_category(self, obj):
         return {"id": obj.category.id, "name": obj.category.name} if obj.category else None
+    

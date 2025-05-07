@@ -2,10 +2,29 @@ import React, { useState, useEffect, useContext } from 'react';
 import TaskCard from './TaskCard';
 import axiosInstance from '../api/axiosInstance';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { AuthContext } from '../context/AuthContext';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-const TaskList = ({ onEditTask }) => {
+const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+
+    const style = {
+        // transform: CSS.Transform.toString(transform),
+        // transition,
+        transform: CSS.Transform.toString(transform),
+        transition: transition || 'transform 200ms ease',
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} />
+        </div>
+    );
+    };
+
+    const TaskList = ({ onEditTask }) => {
     const [filters, setFilters] = useState({
         status: '',
         priority: '',
@@ -20,7 +39,7 @@ const TaskList = ({ onEditTask }) => {
     const { data: tasksData, isLoading: tasksLoading, error: tasksError, refetch: refetchTasks } = useQuery({
         queryKey: ['tasks', filters, pagination.currentPage, user],
         queryFn: async () => {
-        if (!user) return []; // Return empty array if not logged in
+        if (!user) return [];
             const params = new URLSearchParams();
             if (filters.status) params.append('status', filters.status);
             if (filters.priority) params.append('priority', filters.priority);
@@ -36,7 +55,7 @@ const TaskList = ({ onEditTask }) => {
             });
         return response.data.results || [];
         },
-        enabled: !!user, // Only fetch if user is logged in
+        enabled: !!user,
     });
 
     const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useQuery({
@@ -80,22 +99,22 @@ const TaskList = ({ onEditTask }) => {
         setPagination((prev) => ({ ...prev, currentPage: 1 }));
     };
 
-    const onDragEnd = (result) => {
-        console.log('Drag ended:', result);
-        if (!result.destination) return;
+    const onDragEnd = (event) => {
+        console.log('Drag ended:', event);
+        const { active, over } = event;
 
-        const items = Array.from(tasksData || []);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
+        if (!active || !over || active.id === over.id) return;
 
-        const updatedTasks = items.map((task, index) => ({
-        ...task,
-        order: index,
-        }));
+        const oldIndex = tasksData.findIndex((task) => task.id.toString() === active.id);
+        const newIndex = tasksData.findIndex((task) => task.id.toString() === over.id);
 
-        setPagination((prev) => ({ ...prev, totalCount: prev.totalCount }));
+        const updatedTasks = arrayMove(tasksData, oldIndex, newIndex);
+
+        // Update order for all tasks
         updatedTasks.forEach((task, index) => {
-        updateTaskOrderMutation.mutate({ taskId: task.id, newOrder: index });
+        if (task.order !== index) {
+            updateTaskOrderMutation.mutate({ taskId: task.id, newOrder: index });
+        }
         });
     };
 
@@ -158,7 +177,7 @@ const TaskList = ({ onEditTask }) => {
         return <div className="p-4 text-center text-gray-600">No tasks available.</div>;
     }
 
-    // console.log('Rendering tasks:', tasks);
+    console.log('Rendering tasks:', tasks);
 
     return (
         <div className="p-6">
@@ -208,39 +227,22 @@ const TaskList = ({ onEditTask }) => {
             </select>
             </div>
         </div>
-        <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="tasks">
-            {(provided) => (
-                <div
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                >
-                {tasks.map((task, index) => {
-                    // console.log('Rendering task:', task);
-                    return (
-                    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                        {(provided) => (
-                        <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                        >
-                            <TaskCard
-                            task={task}
-                            onEdit={() => onEditTask(task)}
-                            onDelete={handleDeleteTask}
-                            />
-                        </div>
-                        )}
-                    </Draggable>
-                    );
-                })}
-                {provided.placeholder}
-                </div>
-            )}
-            </Droppable>
-        </DragDropContext>
+        <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={tasks.map(task => task.id.toString())} strategy={verticalListSortingStrategy}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.map((task, index) => (
+                <SortableItem
+                    key={task.id}
+                    id={task.id.toString()}
+                    task={task}
+                    index={index}
+                    onEdit={() => onEditTask(task)}
+                    onDelete={handleDeleteTask}
+                />
+                ))}
+            </div>
+            </SortableContext>
+        </DndContext>
         {totalPages > 1 && (
             <div className="mt-6 flex justify-center items-center space-x-4">
             <button

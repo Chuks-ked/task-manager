@@ -42,7 +42,9 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Task.objects.filter(user=self.request.user)
 
     def perform_update(self, serializer):
-        serializer.save()
+        print(f"Updating task with data: {serializer.validated_data}")
+        instance = serializer.save()
+        print(f"Task updated: {instance.id}, new order: {instance.order}")
 
     def perform_destroy(self, instance):
         instance.delete()
