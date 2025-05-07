@@ -36,7 +36,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'title', 'description', 'status', 'priority',
-            'category', 'category_id', 'user', 'created_at', 'updated_at'
+            'category', 'category_id', 'user', 'created_at', 'updated_at', 'order'
         ]
         read_only_fields = ['user', 'created_at', 'updated_at']
 

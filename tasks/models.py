@@ -39,6 +39,11 @@ class Task(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tasks')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(default=0)  # New field for drag-and-drop order
+
 
     def __str__(self):
         return self.title
+    
+    class Meta:
+        ordering = ['order']

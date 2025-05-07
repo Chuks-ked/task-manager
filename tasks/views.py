@@ -40,3 +40,9 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        instance.delete()
