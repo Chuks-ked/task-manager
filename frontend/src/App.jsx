@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import TaskList from './components/TaskList';
 import Login from './components/Login';
@@ -32,7 +32,12 @@ const App = () => {
 
   const handleTaskSaved = () => {
     setRefreshKey((prev) => prev + 1)
-  }
+  };
+
+  const handleLogout = () => {
+    logout();
+    // No need to redirect here since Navigate will handle it
+  };
 
   console.log('Rendering App with user:', user, 'error:', error);
 
@@ -49,7 +54,7 @@ const App = () => {
                 <>
                   <li><span className="text-gray-300">Welcome, {user.username || 'User'}</span></li>
                   <li>
-                    <button onClick={logout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
+                    <button onClick={handleLogout} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">
                       Logout
                     </button>
                   </li>
@@ -69,16 +74,16 @@ const App = () => {
           </div>
         </nav>
         <div className="container mx-auto p-4">
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           <Routes>
             <Route
               path="/"
-              element={<TaskList key={refreshKey} onEditTask={handleEditTask} />}
+              element={user ? <TaskList key={refreshKey} onEditTask={handleEditTask} /> : <Navigate to="/login" />}
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+            <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
           </Routes>
-          {showForm && (
+          {showForm && user && (
             <TaskForm 
               task={selectedTask} 
               onClose={handleCloseForm} 
