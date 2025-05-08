@@ -39,7 +39,7 @@ const App = () => {
     // No need to redirect here since Navigate will handle it
   };
 
-  console.log('Rendering App with user:', user, 'error:', error);
+  // console.log('Rendering App with user:', user, 'error:', error);
 
   return (
     <QueryClientProvider client={queryclient}>

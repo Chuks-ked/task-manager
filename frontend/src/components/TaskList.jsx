@@ -46,7 +46,7 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
             if (filters.category_id) params.append('category', filters.category_id);
             params.append('page', pagination.currentPage);
             const response = await axiosInstance.get(`tasks/?${params.toString()}`);
-            console.log('Tasks API response:', response.data);
+            // console.log('Tasks API response:', response.data);
             setPagination({
                 currentPage: pagination.currentPage,
                 totalCount: response.data.count || 0,
@@ -63,7 +63,7 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
         queryFn: async () => {
         if (!user) return [];
         const response = await axiosInstance.get('categories/');
-        console.log('Categories API response:', response.data);
+        // console.log('Categories API response:', response.data);
         return Array.isArray(response.data) ? response.data : response.data.results || [];
         },
         enabled: !!user,
@@ -100,7 +100,7 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
     };
 
     const onDragEnd = (event) => {
-        console.log('Drag ended:', event);
+        // console.log('Drag ended:', event);
         const { active, over } = event;
 
         if (!active || !over || active.id === over.id) return;
@@ -123,19 +123,19 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
         setWs(websocket);
 
         websocket.onopen = () => {
-        console.log('WebSocket Connected');
+        // console.log('WebSocket Connected');
         };
 
         websocket.onmessage = (message) => {
         const data = JSON.parse(message.data);
-        console.log('Received WebSocket message:', data);
+        // console.log('Received WebSocket message:', data);
         if (data.type === 'task_update') {
             refetchTasks();
         }
         };
 
         websocket.onclose = () => {
-        console.log('WebSocket Disconnected');
+        // console.log('WebSocket Disconnected');
         };
 
         websocket.onerror = (error) => {
@@ -147,8 +147,8 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
         };
     }, []);
 
-    console.log('Tasks Data:', tasksData, 'Tasks Error:', tasksError);
-    console.log('Categories Data:', categoriesData, 'Categories Error:', categoriesError);
+    // console.log('Tasks Data:', tasksData, 'Tasks Error:', tasksError);
+    // console.log('Categories Data:', categoriesData, 'Categories Error:', categoriesError);
 
     if (tasksLoading || categoriesLoading) {
         return <div className="p-4 text-center text-gray-600">Loading tasks...</div>;
@@ -177,7 +177,7 @@ const SortableItem = ({ id, task, onEdit, onDelete, index }) => {
         return <div className="p-4 text-center text-gray-600">No tasks available.</div>;
     }
 
-    console.log('Rendering tasks:', tasks);
+    // console.log('Rendering tasks:', tasks);
 
     return (
         <div className="p-6">
